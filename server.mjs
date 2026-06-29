@@ -303,11 +303,18 @@ async function upsertBookings(req, res) {
   const payload = JSON.parse(await readBody(req) || "{}");
   const incoming = Array.isArray(payload.bookings) ? payload.bookings : [];
   const db = await loadDb();
-  const map = new Map(db.bookings.map((item) => [bookingKey(item), item]));
+  const incomingPnrs = new Set(
+    incoming
+      .map((item) => String(item?.pnr || "").trim().toUpperCase())
+      .filter(Boolean)
+  );
+  const keptBookings = db.bookings.filter((item) => !incomingPnrs.has(String(item.pnr || "").toUpperCase()));
+  const map = new Map(keptBookings.map((item) => [bookingKey(item), item]));
   for (const item of incoming) {
     if (!item.pnr || !item.deadlineIso) continue;
     const normalized = {
       ...item,
+      pnr: String(item.pnr).trim().toUpperCase(),
       passengers: cleanPassengers(item.passengers),
       rawDeadlineText: normalizeText(item.rawDeadlineText),
       status: item.status || "open",
