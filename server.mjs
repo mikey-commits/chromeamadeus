@@ -9,7 +9,7 @@ const dbPath = path.join(dataDir, "ticket-watch-db.json");
 
 const {
   PORT = "8790",
-  HOST = "127.0.0.1",
+  HOST = "0.0.0.0",
   TICKET_WATCH_API_KEY = "",
   TWILIO_ACCOUNT_SID = "",
   TWILIO_AUTH_TOKEN = "",
@@ -359,7 +359,6 @@ const server = http.createServer(async (req, res) => {
 server.listen(Number(PORT), HOST, () => {
   console.log(`Ticket Watch Server: http://${HOST}:${PORT}`);
   console.log(`Twilio inbound webhook: http://${HOST}:${PORT}/twilio/inbound`);
+  setInterval(checkAlerts, 60_000);
+  setTimeout(checkAlerts, 5_000);
 });
-
-setInterval(checkAlerts, 60_000);
-checkAlerts();
